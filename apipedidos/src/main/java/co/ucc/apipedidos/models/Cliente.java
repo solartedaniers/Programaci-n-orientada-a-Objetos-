@@ -1,37 +1,18 @@
 package co.ucc.apipedidos.models;
 
-import jakarta.persistence.*;
-
-@Entity
-@Table(name = "clientes")
 public class Cliente {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int idCliente;
+    private final int idCliente;
+    private final String nombre;
+    private final String correo;
 
-    private String nombreCliente;
-    private String correo;
-
-    public Cliente() {}
-
-    public Cliente(int idCliente, String nombreCliente, String correo) {
+    public Cliente(int idCliente, String nombre, String correo) {
         this.idCliente = idCliente;
-        this.nombreCliente = nombreCliente;
-        this.correo = correo;
+        this.nombre    = nombre;
+        this.correo    = correo;
     }
 
-    public int getIdCliente() { return idCliente; }
-    public void setIdCliente(int idCliente) { this.idCliente = idCliente; }
-
-    public String getNombre() { return nombreCliente; }
-    public void setNombreCliente(String nombreCliente) { this.nombreCliente = nombreCliente; }
-
-    public String getCorreo() { return correo; }
-    public void setCorreo(String correo) { this.correo = correo; }
-
-    @Override
-    public String toString() {
-        return "Cliente{idCliente=" + idCliente + ", nombre=" + nombreCliente + ", correo=" + correo + "}";
-    }
+    public int getIdCliente()  { return idCliente; }
+    public String getNombre()  { return nombre; }
+    public String getCorreo()  { return correo; }
 }

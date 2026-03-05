@@ -1,35 +1,42 @@
 package co.ucc.apipedidos.services;
 
-import co.ucc.apipedidos.models.Inventario;
-import co.ucc.apipedidos.models.Producto;
-import co.ucc.apipedidos.repository.InventarioRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.springframework.stereotype.Service;
 
 @Service
 public class InventarioService {
 
-    @Autowired
-    private InventarioRepository inventarioRepository;
+    private final Map<Integer, Integer> stock = new HashMap<>();
 
-    public boolean hayStock(Producto producto, int cantidad) {
-        Inventario inventario = inventarioRepository.findByProducto(producto);
-        return inventario != null && inventario.getStock() >= cantidad;
+    public InventarioService() {
+        stock.put(1, 10);
+        stock.put(2, 50);
+        stock.put(3, 30);
+        stock.put(4, 15);
+        stock.put(5, 25);
     }
 
-    public void descontar(Producto producto, int cantidad) {
-        Inventario inventario = inventarioRepository.findByProducto(producto);
-        inventario.setStock(inventario.getStock() - cantidad);
-        inventarioRepository.save(inventario);
+    public int mostrarStock(int idProducto) {
+        return stock.getOrDefault(idProducto, 0);
     }
 
-    public void agregar(Producto producto, int cantidad) {
-        Inventario inventario = inventarioRepository.findByProducto(producto);
-        inventario.setStock(inventario.getStock() + cantidad);
-        inventarioRepository.save(inventario);
+    public boolean hayStock(int idProducto, int cantidad) {
+        return stock.getOrDefault(idProducto, 0) >= cantidad;
     }
 
-    public Inventario mostrarStock(Producto producto) {
-        return inventarioRepository.findByProducto(producto);
+    public void descontar(int idProducto, int cantidad) {
+        int actual = stock.getOrDefault(idProducto, 0);
+        if (actual < cantidad) {
+            throw new IllegalArgumentException(
+                    "Stock insuficiente. Disponible: " + actual);
+        }
+        stock.put(idProducto, actual - cantidad);
+    }
+
+    public void agregar(int idProducto, int cantidad) {
+        int actual = stock.getOrDefault(idProducto, 0);
+        stock.put(idProducto, actual + cantidad);
     }
 }

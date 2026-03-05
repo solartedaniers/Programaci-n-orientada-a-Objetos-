@@ -1,34 +1,46 @@
 package co.ucc.apipedidos.controllers;
 
-import co.ucc.apipedidos.models.Pedido;
-import co.ucc.apipedidos.models.enums.MetodoPago;
-import co.ucc.apipedidos.services.PedidoService;
-import co.ucc.apipedidos.services.PagoService;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import co.ucc.apipedidos.models.Pago;
+import co.ucc.apipedidos.models.enums.MetodoPago;
+import co.ucc.apipedidos.services.PagoService;
 
 @RestController
 @RequestMapping("/pagos")
 public class PagoController {
 
     @Autowired
-    private PedidoService pedidoService;
-
-    @Autowired
     private PagoService pagoService;
 
-    @PostMapping("/{idPedido}/pagar")
-    public ResponseEntity<Pedido> pagar(
-            @PathVariable int idPedido,
+    @PostMapping
+    public ResponseEntity<Pago> registrar(
+            @RequestParam int idPedido,
+            @RequestParam double monto,
             @RequestParam MetodoPago metodo) {
-        Pedido pedido = pedidoService.pagar(idPedido, metodo);
-        return ResponseEntity.ok(pedido);
+        Pago pago = pagoService.registrarPago(idPedido, monto, metodo);
+        return ResponseEntity.status(HttpStatus.CREATED).body(pago);
+    }
+
+    @GetMapping
+    public ResponseEntity<List<Pago>> listar() {
+        return ResponseEntity.ok(pagoService.listarPagos());
     }
 
     @PutMapping("/{idPago}/procesar")
-    public ResponseEntity<String> procesarPago(@PathVariable int idPago) {
-        pagoService.procesarPago(idPago);
-        return ResponseEntity.ok("Pago procesado correctamente");
+    public ResponseEntity<Pago> procesar(@PathVariable int idPago) {
+        Pago pago = pagoService.procesarPago(idPago);
+        return ResponseEntity.ok(pago);
     }
 }

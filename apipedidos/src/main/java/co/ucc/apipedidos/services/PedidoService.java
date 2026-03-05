@@ -1,82 +1,81 @@
 package co.ucc.apipedidos.services;
 
-import co.ucc.apipedidos.models.*;
-import co.ucc.apipedidos.models.enums.EstadoPedido;
-import co.ucc.apipedidos.models.enums.MetodoPago;
-import co.ucc.apipedidos.repository.ClienteRepository;
-import co.ucc.apipedidos.repository.PedidoRepository;
-import co.ucc.apipedidos.repository.ProductoRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 
-import java.util.List;
+import co.ucc.apipedidos.models.DetallePedido;
+import co.ucc.apipedidos.models.Pedido;
+import co.ucc.apipedidos.models.Producto;
 
 @Service
 public class PedidoService {
 
-    @Autowired
-    private PedidoRepository pedidoRepository;
+    private final List<Pedido> pedidos = new ArrayList<>();
 
-    @Autowired
-    private ClienteRepository clienteRepository;
+    private final List<Producto> catalogoProductos = new ArrayList<>(List.of(
+            new Producto(1, "Laptop",     2500000.0),
+            new Producto(2, "Mouse",        45000.0),
+            new Producto(3, "Teclado",      85000.0),
+            new Producto(4, "Monitor",     950000.0),
+            new Producto(5, "Audifonos",   120000.0)
+    ));
 
-    @Autowired
-    private ProductoRepository productoRepository;
+    private int contadorPedido  = 1;
+    private int contadorDetalle = 1;
 
-    @Autowired
-    private InventarioService inventarioService;
-
-    @Autowired
-    private DetallePedidoService detallePedidoService;
-
-    @Autowired
-    private PagoService pagoService;
-
-    public Pedido crearPedido(int idCliente) {
-        Cliente cliente = clienteRepository.findById(idCliente).orElseThrow();
-        Pedido pedido = new Pedido(cliente);
-        return pedidoRepository.save(pedido);
+    public Pedido crearPedido(String nombreCliente) {
+        Pedido pedido = new Pedido(contadorPedido++, nombreCliente);
+        pedidos.add(pedido);
+        return pedido;
     }
 
     public Pedido agregarProducto(int idPedido, int idProducto, int cantidad) {
-        Pedido pedido = pedidoRepository.findById(idPedido).orElseThrow();
-        Producto producto = productoRepository.findById(idProducto).orElseThrow();
+        Pedido pedido     = buscarPorId(idPedido);
+        Producto producto = buscarProducto(idProducto);
 
-        if (!inventarioService.hayStock(producto, cantidad)) {
-            throw new RuntimeException("Stock insuficiente para el producto: " + producto.getNombre());
-        }
-
-        DetallePedido detalle = new DetallePedido(producto, cantidad);
-        detallePedidoService.calcularSubTotal(detalle);
-        pedido.getDetalles().add(detalle);
-
-        inventarioService.descontar(producto, cantidad);
-        calcularTotal(pedido);
-
-        return pedidoRepository.save(pedido);
-    }
-
-    public void calcularTotal(Pedido pedido) {
-        double total = pedido.getDetalles()
-                .stream()
-                .mapToDouble(DetallePedido::getSuptotal)
-                .sum();
-        pedido.setTotal(total);
-    }
-
-    public Pedido pagar(int idPedido, MetodoPago metodo) {
-        Pedido pedido = pedidoRepository.findById(idPedido).orElseThrow();
-        Pago pago = pagoService.pagar(metodo);
-        pedido.setPago(pago);
-        pedido.setEstado(EstadoPedido.PAGADO);
-        return pedidoRepository.save(pedido);
+        DetallePedido detalle = new DetallePedido(
+                contadorDetalle++,
+                producto.getNombre(),
+                producto.getPrecio(),
+                cantidad
+        );
+        pedido.agregarDetalle(detalle);
+        return pedido;
     }
 
     public Pedido mostrarResumen(int idPedido) {
-        return pedidoRepository.findById(idPedido).orElseThrow();
+        return buscarPorId(idPedido);
     }
 
     public List<Pedido> listarPedidos() {
-        return pedidoRepository.findAll();
+        return Collections.unmodifiableList(pedidos);
+    }
+
+    public void marcarComoPagado(int idPedido) {
+        Pedido pedido = buscarPorId(idPedido);
+        pedido.marcarComoPagado();
+    }
+
+    public List<Producto> listarProductos() {
+        return Collections.unmodifiableList(catalogoProductos);
+    }
+
+    Pedido buscarPorId(int idPedido) {
+        return pedidos.stream()
+                .filter(p -> p.getIdPedido() == idPedido)
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException(
+                    "Pedido no encontrado con id: " + idPedido));
+    }
+
+    private Producto buscarProducto(int idProducto) {
+        return catalogoProductos.stream()
+                .filter(p -> p.getIdProducto() == idProducto)
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException(
+                    "Producto no encontrado con id: " + idProducto));
     }
 }
