@@ -11,6 +11,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import co.ucc.apipedidos.services.InventarioService;
 
+/**
+ * Controlador REST para la gestión de inventario.
+ * MODULARIDAD: delega toda la lógica a InventarioService.
+ */
 @RestController
 @RequestMapping("/inventario")
 public class InventarioController {

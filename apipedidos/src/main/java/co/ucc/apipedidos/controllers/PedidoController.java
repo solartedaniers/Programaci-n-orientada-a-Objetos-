@@ -15,6 +15,10 @@ import org.springframework.web.bind.annotation.RestController;
 import co.ucc.apipedidos.models.Pedido;
 import co.ucc.apipedidos.services.PedidoService;
 
+/**
+ * Controlador REST para la gestión de pedidos.
+ * MODULARIDAD: delega toda la lógica a PedidoService.
+ */
 @RestController
 @RequestMapping("/pedidos")
 public class PedidoController {

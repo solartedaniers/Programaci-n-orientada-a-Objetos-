@@ -14,6 +14,10 @@ import org.springframework.web.bind.annotation.RestController;
 import co.ucc.apipedidos.models.Cliente;
 import co.ucc.apipedidos.services.ClienteService;
 
+/**
+ * Controlador REST para la gestión de clientes.
+ * MODULARIDAD: delega toda la lógica a ClienteService.
+ */
 @RestController
 @RequestMapping("/clientes")
 public class ClienteController {

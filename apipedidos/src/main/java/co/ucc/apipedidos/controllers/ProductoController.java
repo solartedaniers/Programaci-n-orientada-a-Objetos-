@@ -11,6 +11,10 @@ import org.springframework.web.bind.annotation.RestController;
 import co.ucc.apipedidos.models.Producto;
 import co.ucc.apipedidos.services.PedidoService;
 
+/**
+ * Controlador REST para consulta del catálogo de productos.
+ * MODULARIDAD: delega a PedidoService que administra el catálogo.
+ */
 @RestController
 @RequestMapping("/productos")
 public class ProductoController {

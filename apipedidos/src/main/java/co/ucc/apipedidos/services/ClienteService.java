@@ -8,6 +8,12 @@ import org.springframework.stereotype.Service;
 
 import co.ucc.apipedidos.models.Cliente;
 
+/**
+ * Servicio que gestiona el ciclo de vida de los clientes.
+ *
+ * MODULARIDAD: responsabilidad única — solo opera sobre Cliente.
+ * ENCAPSULAMIENTO: la lista interna es privada y se expone como inmutable.
+ */
 @Service
 public class ClienteService {
 
@@ -22,5 +28,13 @@ public class ClienteService {
 
     public List<Cliente> listarClientes() {
         return Collections.unmodifiableList(clientes);
+    }
+
+    public Cliente buscarPorId(int idCliente) {
+        return clientes.stream()
+                .filter(c -> c.getIdCliente() == idCliente)
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException(
+                    "Cliente no encontrado con id: " + idCliente));
     }
 }

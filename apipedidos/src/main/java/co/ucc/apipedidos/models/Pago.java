@@ -1,47 +1,43 @@
 package co.ucc.apipedidos.models;
 
-import java.time.LocalDateTime;
-
-import co.ucc.apipedidos.models.enums.EstadoPago;
 import co.ucc.apipedidos.models.enums.MetodoPago;
 
-public class Pago {
+/**
+ * Representa un pago realizado por un cliente para cubrir un pedido.
+ *
+ * HERENCIA: Extiende Transaccion ("Pago ES UNA Transaccion").
+ * Reutiliza monto, estado, fecha e idReferencia del padre.
+ *
+ * POLIMORFISMO: implementa procesar() con lógica propia de pago.
+ *
+ * ENCAPSULAMIENTO: metodo es privado y solo se expone mediante getter.
+ * El estado se actualiza únicamente a través de procesar(), nunca con setter externo.
+ */
+public class Pago extends Transaccion {
 
-    private final int idPago;
-    private final double monto;
-    private final LocalDateTime fecha;
     private final MetodoPago metodo;
-    private final int idPedido;
-    private EstadoPago estado;          // ← NO final, cambia con procesarPago()
 
-    public Pago(int idPago, double monto, MetodoPago metodo, int idPedido) {
-        validarMonto(monto);
-        this.idPago   = idPago;
-        this.monto    = monto;
-        this.metodo   = metodo;
-        this.idPedido = idPedido;
-        this.estado   = EstadoPago.PENDIENTE;
-        this.fecha    = LocalDateTime.now();
-    }
-
-    private void validarMonto(double monto) {
-        if (monto <= 0) {
-            throw new IllegalArgumentException(
-                "El monto debe ser mayor que cero. Recibido: " + monto);
+    public Pago(int idTransaccion, double monto, MetodoPago metodo, int idPedido) {
+        super(idTransaccion, monto, idPedido);
+        if (metodo == null) {
+            throw new IllegalArgumentException("El método de pago no puede ser nulo.");
         }
+        this.metodo = metodo;
     }
 
-    public void procesarPago() {
-        if (this.estado == EstadoPago.PROCESADO) {
+    /**
+     * Procesa el pago: valida que no esté ya procesado y actualiza el estado.
+     * POLIMORFISMO: comportamiento específico de Pago.
+     */
+    @Override
+    public void procesar() {
+        if ("PROCESADO".equals(this.estado)) {
             throw new IllegalStateException("El pago ya fue procesado.");
         }
-        this.estado = EstadoPago.PROCESADO;
+        this.estado = "PROCESADO";
     }
 
-    public int getIdPago()          { return idPago; }
-    public double getMonto()        { return monto; }
-    public LocalDateTime getFecha() { return fecha; }
-    public EstadoPago getEstado()   { return estado; }
-    public MetodoPago getMetodo()   { return metodo; }
-    public int getIdPedido()        { return idPedido; }
+    // ─── Getter específico de Pago ────────────────────────────────────────────
+
+    public MetodoPago getMetodo() { return metodo; }
 }

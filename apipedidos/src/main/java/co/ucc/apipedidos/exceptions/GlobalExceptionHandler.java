@@ -1,10 +1,11 @@
 package co.ucc.apipedidos.exceptions;
 
 import java.time.LocalDateTime;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -13,32 +14,30 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(RuntimeException.class)
-    public ResponseEntity<Map<String, Object>> manejarNoEncontrado(
-            RuntimeException ex) {
-        Map<String, Object> respuesta = new HashMap<>();
-        respuesta.put("error",     "Recurso no encontrado");
-        respuesta.put("mensaje",   ex.getMessage());
-        respuesta.put("timestamp", LocalDateTime.now().toString());
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(respuesta);
+    public ResponseEntity<Map<String, Object>> manejarNoEncontrado(RuntimeException ex) {
+        return construirRespuesta("Recurso no encontrado", ex.getMessage(), HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<Map<String, Object>> manejarSolicitudInvalida(
-            IllegalArgumentException ex) {
-        Map<String, Object> respuesta = new HashMap<>();
-        respuesta.put("error",     "Solicitud invalida");
-        respuesta.put("mensaje",   ex.getMessage());
-        respuesta.put("timestamp", LocalDateTime.now().toString());
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(respuesta);
+    public ResponseEntity<Map<String, Object>> manejarSolicitudInvalida(IllegalArgumentException ex) {
+        return construirRespuesta("Solicitud invalida", ex.getMessage(), HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(IllegalStateException.class)
-    public ResponseEntity<Map<String, Object>> manejarConflicto(
-            IllegalStateException ex) {
-        Map<String, Object> respuesta = new HashMap<>();
-        respuesta.put("error",     "Conflicto de estado");
-        respuesta.put("mensaje",   ex.getMessage());
+    public ResponseEntity<Map<String, Object>> manejarConflicto(IllegalStateException ex) {
+        return construirRespuesta("Conflicto de estado", ex.getMessage(), HttpStatus.CONFLICT);
+    }
+
+    private ResponseEntity<Map<String, Object>> construirRespuesta(
+            String error, String mensaje, HttpStatus status) {
+
+        Map<String, Object> respuesta = new LinkedHashMap<>();
+        respuesta.put("status",    status.value());
+        respuesta.put("error",     error);
+        respuesta.put("mensaje",   mensaje);
         respuesta.put("timestamp", LocalDateTime.now().toString());
-        return ResponseEntity.status(HttpStatus.CONFLICT).body(respuesta);
+
+        HttpStatusCode codigo = HttpStatusCode.valueOf(status.value());
+        return new ResponseEntity<Map<String, Object>>(respuesta, codigo);
     }
 }
