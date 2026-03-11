@@ -8,12 +8,6 @@ import org.springframework.stereotype.Service;
 
 import co.ucc.apipedidos.models.Cliente;
 
-/**
- * Servicio que gestiona el ciclo de vida de los clientes.
- *
- * MODULARIDAD: responsabilidad única — solo opera sobre Cliente.
- * ENCAPSULAMIENTO: la lista interna es privada y se expone como inmutable.
- */
 @Service
 public class ClienteService {
 
@@ -21,6 +15,12 @@ public class ClienteService {
     private int contadorId = 1;
 
     public Cliente crearCliente(String nombre, String correo) {
+        if (nombre == null || nombre.isBlank()) {
+            throw new IllegalArgumentException("El nombre no puede estar vacío.");
+        }
+        if (correo == null || correo.isBlank()) {
+            throw new IllegalArgumentException("El correo no puede estar vacío.");
+        }
         Cliente cliente = new Cliente(contadorId++, nombre, correo);
         clientes.add(cliente);
         return cliente;

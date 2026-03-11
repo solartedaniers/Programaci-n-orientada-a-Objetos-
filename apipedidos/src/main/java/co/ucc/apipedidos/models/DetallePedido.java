@@ -1,11 +1,8 @@
 package co.ucc.apipedidos.models;
 
 /**
- * Representa una línea de detalle dentro de un pedido (producto + cantidad).
- *
- * ENCAPSULAMIENTO: todos los atributos son privados y final.
- * El subtotal se calcula internamente en el constructor; no se puede inyectar
- * desde fuera, garantizando coherencia de datos.
+ * Modelo de dominio: línea de detalle de un pedido.
+ * ENCAPSULAMIENTO: subtotal calculado en constructor, sin setters (inmutable).
  */
 public class DetallePedido {
 
@@ -17,19 +14,11 @@ public class DetallePedido {
 
     public DetallePedido(int idDetalle, String nombreProducto,
                          double precioUnitario, int cantidad) {
-        if (cantidad <= 0) {
-            throw new IllegalArgumentException(
-                "La cantidad debe ser mayor que cero. Recibida: " + cantidad);
-        }
-        if (precioUnitario < 0) {
-            throw new IllegalArgumentException(
-                "El precio unitario no puede ser negativo.");
-        }
         this.idDetalle      = idDetalle;
         this.nombreProducto = nombreProducto;
         this.precioUnitario = precioUnitario;
         this.cantidad       = cantidad;
-        this.subtotal       = precioUnitario * cantidad; // calculado internamente
+        this.subtotal       = precioUnitario * cantidad;
     }
 
     public int getIdDetalle()          { return idDetalle; }

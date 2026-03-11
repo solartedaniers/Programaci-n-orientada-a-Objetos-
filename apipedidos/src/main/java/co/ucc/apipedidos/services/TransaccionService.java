@@ -15,18 +15,11 @@ import co.ucc.apipedidos.models.enums.MetodoPago;
 /**
  * Servicio que gestiona el ciclo de vida de las transacciones financieras.
  *
- * POLIMORFISMO: maneja una lista de Transaccion que puede contener Pago o Devolucion.
- *   Al invocar procesarTransaccion(), se llama al procesar() correcto según el tipo real.
+ * POLIMORFISMO: maneja List<Transaccion> que contiene Pago y Devolucion.
+ *   procesarTransaccion() invoca t.procesar() sin conocer el tipo concreto.
  *
- * ABSTRACCIÓN: este servicio no necesita conocer si es Pago o Devolucion para procesar;
- *   solo trabaja contra el contrato de Transaccion.
- *
- * FLUJO API:
- *   1. POST /transacciones/pagos       → crearPago()      (estado: PENDIENTE)
- *   2. PUT  /transacciones/{id}/procesar → procesarTransaccion() (estado: PROCESADO)
- *
- *   1. POST /transacciones/devoluciones → crearDevolucion() (estado: PENDIENTE)
- *   2. PUT  /transacciones/{id}/procesar → procesarTransaccion() (estado: REEMBOLSADO)
+ * realizarPago() y realizarDevolucion() encapsulan el flujo completo
+ * (crear + procesar en un solo paso) para el controller.
  */
 @Service
 public class TransaccionService {
@@ -37,47 +30,68 @@ public class TransaccionService {
     @Autowired
     private PedidoService pedidoService;
 
-    /**
-     * Crea un pago asociado a un pedido existente.
-     * Solo crea la transacción; aún no la procesa.
-     */
-    public Pago crearPago(int idPedido, double monto, MetodoPago metodo) {
-        // Valida que el pedido exista antes de crear la transacción
-        pedidoService.buscarPorId(idPedido);
+    // ─── Flujo de DOS PASOS (crear → procesar por separado) ──────────────────
 
+    /** PASO 1: Crea un pago en estado PENDIENTE. */
+    public Pago crearPago(int idPedido, double monto, MetodoPago metodo) {
+        if (monto <= 0) {
+            throw new IllegalArgumentException("El monto debe ser mayor que cero.");
+        }
+        if (metodo == null) {
+            throw new IllegalArgumentException("El método de pago no puede ser nulo.");
+        }
+        pedidoService.buscarPorId(idPedido); // valida que el pedido exista
         Pago pago = new Pago(contadorId++, monto, metodo, idPedido);
         transacciones.add(pago);
         return pago;
     }
 
-    /**
-     * Crea una devolución asociada a un pedido existente.
-     * Solo crea la transacción; aún no la procesa.
-     */
+    /** PASO 1: Crea una devolución en estado PENDIENTE. */
     public Devolucion crearDevolucion(int idPedido, double monto, String motivo) {
-        // Valida que el pedido exista antes de crear la transacción
+        if (monto <= 0) {
+            throw new IllegalArgumentException("El monto debe ser mayor que cero.");
+        }
+        if (motivo == null || motivo.isBlank()) {
+            throw new IllegalArgumentException("El motivo no puede estar vacío.");
+        }
         pedidoService.buscarPorId(idPedido);
-
         Devolucion devolucion = new Devolucion(contadorId++, monto, idPedido, motivo);
         transacciones.add(devolucion);
         return devolucion;
     }
 
-    /**
-     * Procesa una transacción por su id, sin importar si es Pago o Devolucion.
-     * POLIMORFISMO: se invoca t.procesar() y cada subclase ejecuta su lógica.
-     * Si es un Pago, adicionalmente marca el pedido como PAGADO.
-     */
+    /** PASO 2: Procesa cualquier transacción. POLIMORFISMO en acción. */
     public Transaccion procesarTransaccion(int idTransaccion) {
-        Transaccion transaccion = buscarPorId(idTransaccion);
-        transaccion.procesar(); // polimorfismo en acción
+        Transaccion t = buscarPorId(idTransaccion);
+        t.procesar(); // polimorfismo: Pago→PROCESADO, Devolucion→REEMBOLSADO
 
-        // Si la transacción es un Pago procesado, marca el pedido como pagado
-        if (transaccion instanceof Pago) {
-            pedidoService.buscarPorId(transaccion.getIdReferencia())
-                         .marcarComoPagado();
+        // Si es un pago procesado, marca el pedido como pagado
+        if (t instanceof Pago) {
+            pedidoService.marcarComoPagado(t.getIdReferencia());
         }
-        return transaccion;
+        return t;
+    }
+
+    // ─── Flujo de UN PASO (crear + procesar juntos) ───────────────────────────
+
+    /**
+     * Realiza un pago completo: crea y procesa en un solo paso.
+     * Expuesto en el controller como "realizarPago".
+     */
+    public Pago realizarPago(int idPedido, double monto, MetodoPago metodo) {
+        Pago pago = crearPago(idPedido, monto, metodo);
+        procesarTransaccion(pago.getIdTransaccion());
+        return pago;
+    }
+
+    /**
+     * Realiza una devolución completa: crea y procesa en un solo paso.
+     * Expuesto en el controller como "realizarDevolucion".
+     */
+    public Devolucion realizarDevolucion(int idPedido, double monto, String motivo) {
+        Devolucion dev = crearDevolucion(idPedido, monto, motivo);
+        procesarTransaccion(dev.getIdTransaccion());
+        return dev;
     }
 
     public List<Transaccion> listarTransacciones() {

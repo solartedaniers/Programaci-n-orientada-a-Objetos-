@@ -30,14 +30,11 @@ public class GlobalExceptionHandler {
 
     private ResponseEntity<Map<String, Object>> construirRespuesta(
             String error, String mensaje, HttpStatus status) {
-
-        Map<String, Object> respuesta = new LinkedHashMap<>();
-        respuesta.put("status",    status.value());
-        respuesta.put("error",     error);
-        respuesta.put("mensaje",   mensaje);
-        respuesta.put("timestamp", LocalDateTime.now().toString());
-
-        HttpStatusCode codigo = HttpStatusCode.valueOf(status.value());
-        return new ResponseEntity<Map<String, Object>>(respuesta, codigo);
+        Map<String, Object> cuerpo = new LinkedHashMap<>();
+        cuerpo.put("status",    status.value());
+        cuerpo.put("error",     error);
+        cuerpo.put("mensaje",   mensaje);
+        cuerpo.put("timestamp", LocalDateTime.now().toString());
+        return new ResponseEntity<>(cuerpo, HttpStatusCode.valueOf(status.value()));
     }
 }

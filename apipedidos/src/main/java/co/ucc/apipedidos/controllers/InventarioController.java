@@ -2,19 +2,10 @@ package co.ucc.apipedidos.controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-
+import org.springframework.web.bind.annotation.*;
+import co.ucc.apipedidos.dto.StockDTO;
 import co.ucc.apipedidos.services.InventarioService;
 
-/**
- * Controlador REST para la gestión de inventario.
- * MODULARIDAD: delega toda la lógica a InventarioService.
- */
 @RestController
 @RequestMapping("/inventario")
 public class InventarioController {
@@ -34,19 +25,19 @@ public class InventarioController {
         return ResponseEntity.ok(inventarioService.hayStock(idProducto, cantidad));
     }
 
-    @PutMapping("/{idProducto}/descontar")
-    public ResponseEntity<String> descontarStock(
-            @PathVariable int idProducto,
-            @RequestParam int cantidad) {
-        inventarioService.descontar(idProducto, cantidad);
-        return ResponseEntity.ok("Stock descontado correctamente");
-    }
-
     @PutMapping("/{idProducto}/agregar")
     public ResponseEntity<String> agregarStock(
             @PathVariable int idProducto,
-            @RequestParam int cantidad) {
-        inventarioService.agregar(idProducto, cantidad);
+            @RequestBody StockDTO dto) {
+        inventarioService.agregar(idProducto, dto.getCantidad());
         return ResponseEntity.ok("Stock agregado correctamente");
+    }
+
+    @PutMapping("/{idProducto}/descontar")
+    public ResponseEntity<String> descontarStock(
+            @PathVariable int idProducto,
+            @RequestBody StockDTO dto) {
+        inventarioService.descontar(idProducto, dto.getCantidad());
+        return ResponseEntity.ok("Stock descontado correctamente");
     }
 }

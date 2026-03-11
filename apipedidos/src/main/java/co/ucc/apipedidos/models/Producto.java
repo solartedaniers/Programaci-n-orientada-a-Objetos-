@@ -1,10 +1,8 @@
 package co.ucc.apipedidos.models;
 
 /**
- * Representa un producto disponible en el catálogo.
- *
- * ENCAPSULAMIENTO: atributos privados y final. Inmutable por diseño;
- * el precio y nombre no cambian en tiempo de ejecución para esta versión del sistema.
+ * Modelo de dominio: representa un producto del catálogo.
+ * ENCAPSULAMIENTO: atributos private final, sin setters (inmutable).
  */
 public class Producto {
 
@@ -13,12 +11,6 @@ public class Producto {
     private final double precio;
 
     public Producto(int idProducto, String nombre, double precio) {
-        if (nombre == null || nombre.isBlank()) {
-            throw new IllegalArgumentException("El nombre del producto no puede estar vacío.");
-        }
-        if (precio < 0) {
-            throw new IllegalArgumentException("El precio no puede ser negativo.");
-        }
         this.idProducto = idProducto;
         this.nombre     = nombre;
         this.precio     = precio;
