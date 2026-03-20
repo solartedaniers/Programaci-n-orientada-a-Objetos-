@@ -1,44 +1,54 @@
+// Envio.java
 package co.ucc.apipedidos.models;
 
-/**
- * Clase abstracta que representa un envío asociado a un pedido.
- *
- * ABSTRACCIÓN: define el contrato calcularCosto() para todos los tipos de envío.
- *   No se puede instanciar directamente; solo a través de sus subclases.
- *
- * ENCAPSULAMIENTO:
- *   - idEnvio e idPedido son private final: inmutables.
- *   - peso y volumen son protected: las subclases los leen en calcularCosto().
- *
- * HERENCIA: EnvioEstandar, EnvioExpres, EnvioInternacional, EnvioPorDron
- *   extienden esta clase y SON UN Envio.
- *
- * POLIMORFISMO: al invocar calcularCosto() desde una referencia Envio,
- *   el método ejecutado depende del tipo concreto del objeto.
- */
+import co.ucc.apipedidos.models.enums.TipoEnvio;
+import jakarta.persistence.Column;
+import jakarta.persistence.DiscriminatorColumn;
+import jakarta.persistence.DiscriminatorType;
+import jakarta.persistence.DiscriminatorValue;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Inheritance;
+import jakarta.persistence.InheritanceType;
+import jakarta.persistence.Table;
+
+@Entity
+@Table(name = "envios")
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+@DiscriminatorColumn(name = "tipo_envio", discriminatorType = DiscriminatorType.STRING)
 public abstract class Envio {
 
-    private final int idEnvio;
-    private final int idPedido;
-    protected final double peso;
-    protected final double volumen;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private int id;
 
-    protected Envio(int idEnvio, double peso, double volumen, int idPedido) {
-        this.idEnvio  = idEnvio;
-        this.peso     = peso;
-        this.volumen  = volumen;
-        this.idPedido = idPedido;
+    @Column(name = "id_pedido", nullable = false)
+    private int idPedido;
+
+    @Column(nullable = false)
+    private double peso;
+
+    @Column(nullable = false)
+    private double volumen;
+
+    public int getId()        { return id; }
+    public int getIdPedido()  { return idPedido; }
+    public double getPeso()   { return peso; }
+    public double getVolumen(){ return volumen; }
+
+    public TipoEnvio getTipoEnvio() {
+        return TipoEnvio.valueOf(
+            getClass().getAnnotation(DiscriminatorValue.class).value()
+        );
     }
 
-    /**
-     * Calcula el costo del envío.
-     * POLIMORFISMO de sobreescritura: cada subclase aplica su tarifa.
-     * Fórmula base: max(peso, volumen) * tarifa_propia
-     */
-    public abstract double calcularCosto();
+    private void setId(int id)            { this.id = id; }
+    public void setIdPedido(int idPedido) { this.idPedido = idPedido; }
+    public void setPeso(double peso)      { this.peso = peso; }
+    public void setVolumen(double v)      { this.volumen = v; }
 
-    public int getIdEnvio()    { return idEnvio; }
-    public double getPeso()    { return peso; }
-    public double getVolumen() { return volumen; }
-    public int getIdPedido()   { return idPedido; }
+    public abstract double calcularCosto();
 }
+

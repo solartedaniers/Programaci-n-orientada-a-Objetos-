@@ -1,7 +1,7 @@
+// PedidoDTO.java
 package co.ucc.apipedidos.dto;
 public class PedidoDTO {
-    private String nombreCliente;
-    public PedidoDTO() {}
-    public String getNombreCliente() { return nombreCliente; }
-    public void setNombreCliente(String v) { this.nombreCliente = v; }
+    private int idCliente;
+    public int getIdCliente()           { return idCliente; }
+    public void setIdCliente(int id)    { this.idCliente = id; }
 }

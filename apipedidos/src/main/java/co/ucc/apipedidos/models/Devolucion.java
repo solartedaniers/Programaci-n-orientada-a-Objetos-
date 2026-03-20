@@ -1,25 +1,23 @@
+// Devolucion.java
 package co.ucc.apipedidos.models;
 
-/**
- * HERENCIA: Devolucion ES UNA Transaccion.
- * POLIMORFISMO de sobreescritura: implementa procesar() con lógica propia.
- */
+import co.ucc.apipedidos.models.enums.EstadoTransaccion;
+import jakarta.persistence.Column;
+import jakarta.persistence.DiscriminatorValue;
+import jakarta.persistence.Entity;
+
+@Entity
+@DiscriminatorValue("DEVOLUCION")
 public class Devolucion extends Transaccion {
 
-    private final String motivo;
+    @Column
+    private String motivo;
 
-    public Devolucion(int idTransaccion, double monto, int idPedido, String motivo) {
-        super(idTransaccion, monto, idPedido);
-        this.motivo = motivo;
-    }
+    public String getMotivo()        { return motivo; }
+    public void setMotivo(String m)  { this.motivo = m; }
 
     @Override
     public void procesar() {
-        if ("REEMBOLSADO".equals(this.estado)) {
-            throw new IllegalStateException("La devolución ya fue reembolsada.");
-        }
-        this.estado = "REEMBOLSADO";
+        setEstado(EstadoTransaccion.REEMBOLSADO);
     }
-
-    public String getMotivo() { return motivo; }
 }

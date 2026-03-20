@@ -1,3 +1,4 @@
+// GlobalExceptionHandler.java
 package co.ucc.apipedidos.exceptions;
 
 import java.time.LocalDateTime;
@@ -5,7 +6,6 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -35,6 +35,6 @@ public class GlobalExceptionHandler {
         cuerpo.put("error",     error);
         cuerpo.put("mensaje",   mensaje);
         cuerpo.put("timestamp", LocalDateTime.now().toString());
-        return new ResponseEntity<>(cuerpo, HttpStatusCode.valueOf(status.value()));
+        return new ResponseEntity<>(cuerpo, status);
     }
 }

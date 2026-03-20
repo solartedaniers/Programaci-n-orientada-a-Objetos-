@@ -1,27 +1,25 @@
+// Pago.java
 package co.ucc.apipedidos.models;
 
+import co.ucc.apipedidos.models.enums.EstadoTransaccion;
 import co.ucc.apipedidos.models.enums.MetodoPago;
+import jakarta.persistence.DiscriminatorValue;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 
-/**
- * HERENCIA: Pago ES UNA Transaccion.
- * POLIMORFISMO de sobreescritura: implementa procesar() con lógica propia.
- */
+@Entity
+@DiscriminatorValue("PAGO")
 public class Pago extends Transaccion {
 
-    private final MetodoPago metodo;
+    @Enumerated(EnumType.STRING)
+    private MetodoPago metodoPago;
 
-    public Pago(int idTransaccion, double monto, MetodoPago metodo, int idPedido) {
-        super(idTransaccion, monto, idPedido);
-        this.metodo = metodo;
-    }
+    public MetodoPago getMetodoPago()        { return metodoPago; }
+    public void setMetodoPago(MetodoPago m)  { this.metodoPago = m; }
 
     @Override
     public void procesar() {
-        if ("PROCESADO".equals(this.estado)) {
-            throw new IllegalStateException("El pago ya fue procesado.");
-        }
-        this.estado = "PROCESADO";
+        setEstado(EstadoTransaccion.PROCESADO);
     }
-
-    public MetodoPago getMetodo() { return metodo; }
 }

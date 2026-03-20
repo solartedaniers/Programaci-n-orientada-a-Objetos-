@@ -1,22 +1,27 @@
+// Cliente.java
 package co.ucc.apipedidos.models;
 
-/**
- * Modelo de dominio: representa un cliente.
- * ENCAPSULAMIENTO: atributos private final, sin setters (inmutable).
- */
+import jakarta.persistence.*;
+
+@Entity
+@Table(name = "clientes")
 public class Cliente {
 
-    private final int idCliente;
-    private final String nombre;
-    private final String correo;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private int id;
 
-    public Cliente(int idCliente, String nombre, String correo) {
-        this.idCliente = idCliente;
-        this.nombre    = nombre;
-        this.correo    = correo;
-    }
+    @Column(nullable = false)
+    private String nombre;
 
-    public int getIdCliente()  { return idCliente; }
-    public String getNombre()  { return nombre; }
-    public String getCorreo()  { return correo; }
+    @Column(nullable = false, unique = true)
+    private String correo;
+
+    public int getId()        { return id; }
+    public String getNombre() { return nombre; }
+    public String getCorreo() { return correo; }
+
+    private void setId(int id)         { this.id = id; }
+    public void setNombre(String n)    { this.nombre = n; }
+    public void setCorreo(String c)    { this.correo = c; }
 }

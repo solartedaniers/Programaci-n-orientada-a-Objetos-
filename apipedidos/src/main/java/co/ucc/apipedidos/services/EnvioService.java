@@ -1,78 +1,65 @@
+// EnvioService.java
 package co.ucc.apipedidos.services;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import co.ucc.apipedidos.models.Envio;
+import co.ucc.apipedidos.models.EnvioDron;
 import co.ucc.apipedidos.models.EnvioEstandar;
-import co.ucc.apipedidos.models.EnvioExpres;
+import co.ucc.apipedidos.models.EnvioExpress;
 import co.ucc.apipedidos.models.EnvioInternacional;
-import co.ucc.apipedidos.models.EnvioPorDron;
 import co.ucc.apipedidos.models.enums.TipoEnvio;
+import co.ucc.apipedidos.repositories.EnvioRepository;
+import co.ucc.apipedidos.repositories.PedidoRepository;
 
-/**
- * Servicio que gestiona los envíos.
- *
- * POLIMORFISMO: List<Envio> contiene cualquier subclase.
- *   calcularCostoEnvio() invoca envio.calcularCosto() sin conocer el tipo concreto.
- */
 @Service
 public class EnvioService {
 
-    private final List<Envio> envios = new ArrayList<>();
-    private int contadorId = 1;
+    @Autowired
+    private EnvioRepository envioRepository;
 
     @Autowired
-    private PedidoService pedidoService;
+    private PedidoRepository pedidoRepository;
 
     public Envio crearEnvio(int idPedido, double peso, double volumen, TipoEnvio tipo) {
-        pedidoService.buscarPorId(idPedido);
-
-        if (peso <= 0 || volumen <= 0) {
-            throw new IllegalArgumentException(
-                "El peso y el volumen deben ser mayores que cero.");
-        }
-        if (tipo == null) {
-            throw new IllegalArgumentException("El tipo de envío no puede ser nulo.");
-        }
-
-        Envio envio = fabricarEnvio(contadorId++, peso, volumen, idPedido, tipo);
-        envios.add(envio);
-        return envio;
+        pedidoRepository.findById(idPedido)
+            .orElseThrow(() -> new RuntimeException("Pedido no encontrado: " + idPedido));
+        if (peso <= 0)
+            throw new IllegalArgumentException("El peso debe ser mayor a 0");
+        if (!envioRepository.findByIdPedido(idPedido).isEmpty())
+            throw new IllegalStateException("El pedido ya tiene un envio asignado");
+        Envio envio = fabricarEnvio(idPedido, peso, volumen, tipo);
+        return envioRepository.save(envio);
     }
 
-    /** Rule switch (Java 14+): instancia la subclase correcta. */
-    private Envio fabricarEnvio(int id, double peso, double volumen,
-                                 int idPedido, TipoEnvio tipo) {
-        return switch (tipo) {
-            case ESTANDAR      -> new EnvioEstandar(id, peso, volumen, idPedido);
-            case EXPRES        -> new EnvioExpres(id, peso, volumen, idPedido);
-            case INTERNACIONAL -> new EnvioInternacional(id, peso, volumen, idPedido);
-            case DRON          -> new EnvioPorDron(id, peso, volumen, idPedido);
-        };
-    }
-
-    /**
-     * POLIMORFISMO: llama calcularCosto() sobre referencia Envio abstracta.
-     * El objeto real ejecuta su propia fórmula sin que el service la conozca.
-     */
     public double calcularCostoEnvio(int idEnvio) {
-        return buscarPorId(idEnvio).calcularCosto();
+        return buscarEnvio(idEnvio).calcularCosto();
     }
 
     public List<Envio> listarEnvios() {
-        return Collections.unmodifiableList(envios);
+        return envioRepository.findAll();
     }
 
-    public Envio buscarPorId(int idEnvio) {
-        return envios.stream()
-                .filter(e -> e.getIdEnvio() == idEnvio)
-                .findFirst()
-                .orElseThrow(() -> new RuntimeException(
-                    "Envío no encontrado con id: " + idEnvio));
+    public Envio buscarEnvio(int id) {
+        return envioRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Envio no encontrado: " + id));
+    }
+
+    private Envio fabricarEnvio(int idPedido, double peso, double volumen, TipoEnvio tipo) {
+        Envio e;
+        switch (tipo) {
+            case ESTANDAR:      e = new EnvioEstandar();      break;
+            case EXPRESS:       e = new EnvioExpress();       break;
+            case INTERNACIONAL: e = new EnvioInternacional(); break;
+            case DRON:          e = new EnvioDron();          break;
+            default: throw new IllegalArgumentException("Tipo de envio no valido");
+        }
+        e.setIdPedido(idPedido);
+        e.setPeso(peso);
+        e.setVolumen(volumen);
+        return e;
     }
 }

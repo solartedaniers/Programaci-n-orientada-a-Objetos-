@@ -1,53 +1,55 @@
+// Pedido.java
 package co.ucc.apipedidos.models;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import co.ucc.apipedidos.models.enums.EstadoPedido;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
 
+@Entity
+@Table(name = "pedidos")
 public class Pedido {
 
-    private final int idPedido;
-    private final String nombreCliente;
-    private final List<DetallePedido> detalles;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private int id;
+
+    @ManyToOne
+    @JoinColumn(name = "cliente_id", nullable = false)
+    private Cliente cliente;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private EstadoPedido estado;
+
+    @Column(nullable = false)
     private double total;
 
-    public Pedido(int idPedido, String nombreCliente) {
-        this.idPedido      = idPedido;
-        this.nombreCliente = nombreCliente;
-        this.estado        = EstadoPedido.CREADO;
-        this.detalles      = new ArrayList<>();
-        this.total         = 0.0;
-    }
+    @OneToMany(mappedBy = "pedido", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<DetallePedido> detalles = new ArrayList<>();
 
-    public void setEstado(EstadoPedido estado) {
-        this.estado = estado;
-    }
+    public int getId()                       { return id; }
+    public Cliente getCliente()              { return cliente; }
+    public EstadoPedido getEstado()          { return estado; }
+    public double getTotal()                 { return total; }
+    public List<DetallePedido> getDetalles() { return detalles; }
 
-    public void setTotal(double total) {
-        this.total = total;
-    }
-
-    public void agregarDetalle(DetallePedido detalle) {
-        this.detalles.add(detalle);
-    }
-
-    public void marcarComoPagado() {
-        if (this.estado == EstadoPedido.CREADO) {
-            throw new IllegalStateException(
-                "No se puede pagar un pedido sin productos.");
-        }
-        this.estado = EstadoPedido.PAGADO;
-    }
-
-    public int getIdPedido()         { return idPedido; }
-    public String getNombreCliente() { return nombreCliente; }
-    public EstadoPedido getEstado()  { return estado; }
-    public double getTotal()         { return total; }
-
-    public List<DetallePedido> getDetalles() {
-        return Collections.unmodifiableList(detalles);
-    }
+    private void setId(int id)                      { this.id = id; }
+    public void setCliente(Cliente c)               { this.cliente = c; }
+    public void setEstado(EstadoPedido e)            { this.estado = e; }
+    public void setTotal(double t)                  { this.total = t; }
+    private void setDetalles(List<DetallePedido> d) { this.detalles = d; }
 }

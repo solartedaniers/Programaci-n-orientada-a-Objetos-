@@ -1,22 +1,37 @@
+// Producto.java
 package co.ucc.apipedidos.models;
 
-/**
- * Modelo de dominio: representa un producto del catálogo.
- * ENCAPSULAMIENTO: atributos private final, sin setters (inmutable).
- */
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+
+@Entity
+@Table(name = "productos")
 public class Producto {
 
-    private final int idProducto;
-    private final String nombre;
-    private final double precio;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private int id;
 
-    public Producto(int idProducto, String nombre, double precio) {
-        this.idProducto = idProducto;
-        this.nombre     = nombre;
-        this.precio     = precio;
-    }
+    @Column(nullable = false)
+    private String nombre;
 
-    public int getIdProducto() { return idProducto; }
-    public String getNombre()  { return nombre; }
-    public double getPrecio()  { return precio; }
+    @Column(nullable = false)
+    private double precio;
+
+    @Column(nullable = false)
+    private int stock;
+
+    public int getId()        { return id; }
+    public String getNombre() { return nombre; }
+    public double getPrecio() { return precio; }
+    public int getStock()     { return stock; }
+
+    private void setId(int id)       { this.id = id; }
+    private void setNombre(String n) { this.nombre = n; }
+    public void setPrecio(double p)  { this.precio = p; }
+    public void setStock(int s)      { this.stock = s; }
 }

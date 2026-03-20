@@ -1,45 +1,47 @@
+// InventarioService.java
 package co.ucc.apipedidos.services;
 
-import java.util.HashMap;
-import java.util.Map;
-
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import co.ucc.apipedidos.models.Producto;
+import co.ucc.apipedidos.repositories.ProductoRepository;
 
 @Service
 public class InventarioService {
 
-    private final Map<Integer, Integer> stock = new HashMap<>();
-
-    public InventarioService() {
-        stock.put(1, 10);
-        stock.put(2, 50);
-        stock.put(3, 30);
-        stock.put(4, 15);
-        stock.put(5, 25);
-    }
-
-    public int mostrarStock(int idProducto) {
-        return stock.getOrDefault(idProducto, 0);
-    }
+    @Autowired
+    private ProductoRepository productoRepository;
 
     public boolean hayStock(int idProducto, int cantidad) {
-        return stock.getOrDefault(idProducto, 0) >= cantidad;
-    }
-
-    public void descontar(int idProducto, int cantidad) {
-        int actual = stock.getOrDefault(idProducto, 0);
-        if (actual < cantidad) {
-            throw new IllegalArgumentException(
-                "Stock insuficiente para producto " + idProducto +
-                ". Disponible: " + actual + ", requerido: " + cantidad);
-        }
-        stock.put(idProducto, actual - cantidad);
+        Producto p = buscarProducto(idProducto);
+        return p.getStock() >= cantidad;
     }
 
     public void agregar(int idProducto, int cantidad) {
-        if (cantidad <= 0) {
-            throw new IllegalArgumentException("La cantidad a agregar debe ser mayor que cero.");
-        }
-        stock.put(idProducto, stock.getOrDefault(idProducto, 0) + cantidad);
+        if (cantidad <= 0)
+            throw new IllegalArgumentException("La cantidad debe ser positiva");
+        Producto p = buscarProducto(idProducto);
+        p.setStock(p.getStock() + cantidad);
+        productoRepository.save(p);
+    }
+
+    public void descontar(int idProducto, int cantidad) {
+        if (cantidad <= 0)
+            throw new IllegalArgumentException("La cantidad debe ser positiva");
+        Producto p = buscarProducto(idProducto);
+        if (p.getStock() < cantidad)
+            throw new IllegalStateException("Stock insuficiente");
+        p.setStock(p.getStock() - cantidad);
+        productoRepository.save(p);
+    }
+
+    public int mostrarStock(int idProducto) {
+        return buscarProducto(idProducto).getStock();
+    }
+
+    public Producto buscarProducto(int id) {
+        return productoRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Producto no encontrado: " + id));
     }
 }

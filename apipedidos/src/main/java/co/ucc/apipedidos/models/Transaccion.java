@@ -1,37 +1,49 @@
+// Transaccion.java
 package co.ucc.apipedidos.models;
 
-import java.time.LocalDateTime;
+import co.ucc.apipedidos.models.enums.EstadoTransaccion;
+import jakarta.persistence.Column;
+import jakarta.persistence.DiscriminatorColumn;
+import jakarta.persistence.DiscriminatorType;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Inheritance;
+import jakarta.persistence.InheritanceType;
+import jakarta.persistence.Table;
 
-/**
- * Clase abstracta que representa cualquier movimiento financiero.
- *
- * ABSTRACCIÓN: define el contrato común para Pago y Devolucion.
- * ENCAPSULAMIENTO: estado es protected; solo las subclases lo modifican
- *   dentro de su implementación de procesar(). Sin setter público.
- * POLIMORFISMO: procesar() abstracto — cada subclase define su comportamiento.
- */
+@Entity
+@Table(name = "transacciones")
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+@DiscriminatorColumn(name = "tipo_transaccion", discriminatorType = DiscriminatorType.STRING)
 public abstract class Transaccion {
 
-    private final int idTransaccion;
-    private final LocalDateTime fecha;
-    protected double monto;
-    protected String estado;
-    protected final int idReferencia;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private int id;
 
-    protected Transaccion(int idTransaccion, double monto, int idReferencia) {
-        this.idTransaccion = idTransaccion;
-        this.monto         = monto;
-        this.idReferencia  = idReferencia;
-        this.estado        = "PENDIENTE";
-        this.fecha         = LocalDateTime.now();
-    }
+    @Column(nullable = false)
+    private int idPedido;
 
-    /** POLIMORFISMO de sobreescritura: cada subclase implementa su lógica. */
+    @Column(nullable = false)
+    private double monto;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private EstadoTransaccion estado;
+
+    public int getId()                    { return id; }
+    public int getIdPedido()              { return idPedido; }
+    public double getMonto()              { return monto; }
+    public EstadoTransaccion getEstado()  { return estado; }
+
+    private void setId(int id)                   { this.id = id; }
+    public void setIdPedido(int idPedido)         { this.idPedido = idPedido; }
+    public void setMonto(double monto)            { this.monto = monto; }
+    protected void setEstado(EstadoTransaccion e) { this.estado = e; }
+
     public abstract void procesar();
-
-    public int getIdTransaccion()   { return idTransaccion; }
-    public double getMonto()        { return monto; }
-    public String getEstado()       { return estado; }
-    public LocalDateTime getFecha() { return fecha; }
-    public int getIdReferencia()    { return idReferencia; }
 }

@@ -1,7 +1,5 @@
+// EstadoPedido.java
 package co.ucc.apipedidos.models.enums;
-
 public enum EstadoPedido {
-    CREADO,
-    CON_PRODUCTOS,
-    PAGADO
+    CREADO, EN_PROCESO, CANCELADO, PAGADO, ENVIADO
 }

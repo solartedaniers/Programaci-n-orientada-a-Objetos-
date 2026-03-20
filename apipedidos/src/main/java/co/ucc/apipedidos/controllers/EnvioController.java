@@ -1,10 +1,18 @@
+// EnvioController.java
 package co.ucc.apipedidos.controllers;
 
 import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
 import co.ucc.apipedidos.dto.EnvioDTO;
 import co.ucc.apipedidos.models.Envio;
 import co.ucc.apipedidos.services.EnvioService;
@@ -16,10 +24,6 @@ public class EnvioController {
     @Autowired
     private EnvioService envioService;
 
-    /**
-     * Crea un envío del tipo indicado para un pedido.
-     * tipoEnvio acepta: ESTANDAR, EXPRES, INTERNACIONAL, DRON
-     */
     @PostMapping
     public ResponseEntity<Envio> crearEnvio(@RequestBody EnvioDTO dto) {
         Envio envio = envioService.crearEnvio(
@@ -27,10 +31,6 @@ public class EnvioController {
         return ResponseEntity.status(HttpStatus.CREATED).body(envio);
     }
 
-    /**
-     * Calcula el costo de un envío ya creado.
-     * POLIMORFISMO: envio.calcularCosto() ejecuta la fórmula de la subclase real.
-     */
     @GetMapping("/{idEnvio}/costo")
     public ResponseEntity<Double> calcularCosto(@PathVariable int idEnvio) {
         return ResponseEntity.ok(envioService.calcularCostoEnvio(idEnvio));
