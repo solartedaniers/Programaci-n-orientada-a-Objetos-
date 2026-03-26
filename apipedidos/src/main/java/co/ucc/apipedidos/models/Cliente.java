@@ -1,7 +1,12 @@
 // Cliente.java
 package co.ucc.apipedidos.models;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "clientes")
@@ -21,7 +26,6 @@ public class Cliente {
     public String getNombre() { return nombre; }
     public String getCorreo() { return correo; }
 
-    private void setId(int id)         { this.id = id; }
     public void setNombre(String n)    { this.nombre = n; }
     public void setCorreo(String c)    { this.correo = c; }
 }

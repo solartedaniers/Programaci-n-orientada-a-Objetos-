@@ -30,8 +30,6 @@ public class Producto {
     public double getPrecio() { return precio; }
     public int getStock()     { return stock; }
 
-    private void setId(int id)       { this.id = id; }
-    private void setNombre(String n) { this.nombre = n; }
     public void setPrecio(double p)  { this.precio = p; }
     public void setStock(int s)      { this.stock = s; }
 }

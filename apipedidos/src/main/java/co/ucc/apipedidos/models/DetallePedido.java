@@ -39,7 +39,6 @@ public class DetallePedido {
     public Pedido getPedido()          { return pedido; }
     public double getSubtotal()        { return precioUnitario * cantidad; }
 
-    private void setId(int id)                 { this.id = id; }
     public void setCantidad(int c)             { this.cantidad = c; }
     public void setPrecioUnitario(double p)    { this.precioUnitario = p; }
     public void setProducto(Producto p)        { this.producto = p; }

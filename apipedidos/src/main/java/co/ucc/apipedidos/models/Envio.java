@@ -1,6 +1,8 @@
 // Envio.java
 package co.ucc.apipedidos.models;
 
+import java.util.Objects;
+
 import co.ucc.apipedidos.models.enums.TipoEnvio;
 import jakarta.persistence.Column;
 import jakarta.persistence.DiscriminatorColumn;
@@ -39,16 +41,13 @@ public abstract class Envio {
     public double getVolumen(){ return volumen; }
 
     public TipoEnvio getTipoEnvio() {
-        return TipoEnvio.valueOf(
-            getClass().getAnnotation(DiscriminatorValue.class).value()
-        );
+        DiscriminatorValue discriminatorValue = getClass().getAnnotation(DiscriminatorValue.class);
+        return TipoEnvio.valueOf(Objects.requireNonNull(discriminatorValue, "La subclase de Envio debe definir @DiscriminatorValue").value());
     }
 
-    private void setId(int id)            { this.id = id; }
     public void setIdPedido(int idPedido) { this.idPedido = idPedido; }
     public void setPeso(double peso)      { this.peso = peso; }
     public void setVolumen(double v)      { this.volumen = v; }
 
     public abstract double calcularCosto();
 }
-

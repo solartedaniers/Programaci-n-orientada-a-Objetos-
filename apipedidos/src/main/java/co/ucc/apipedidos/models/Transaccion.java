@@ -40,7 +40,6 @@ public abstract class Transaccion {
     public double getMonto()              { return monto; }
     public EstadoTransaccion getEstado()  { return estado; }
 
-    private void setId(int id)                   { this.id = id; }
     public void setIdPedido(int idPedido)         { this.idPedido = idPedido; }
     public void setMonto(double monto)            { this.monto = monto; }
     protected void setEstado(EstadoTransaccion e) { this.estado = e; }

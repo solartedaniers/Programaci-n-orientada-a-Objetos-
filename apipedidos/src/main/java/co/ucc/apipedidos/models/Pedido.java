@@ -47,9 +47,7 @@ public class Pedido {
     public double getTotal()                 { return total; }
     public List<DetallePedido> getDetalles() { return detalles; }
 
-    private void setId(int id)                      { this.id = id; }
     public void setCliente(Cliente c)               { this.cliente = c; }
     public void setEstado(EstadoPedido e)            { this.estado = e; }
     public void setTotal(double t)                  { this.total = t; }
-    private void setDetalles(List<DetallePedido> d) { this.detalles = d; }
 }
