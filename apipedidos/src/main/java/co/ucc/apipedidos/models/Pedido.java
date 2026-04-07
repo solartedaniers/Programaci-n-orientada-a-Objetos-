@@ -38,16 +38,43 @@ public class Pedido {
     @Column(nullable = false)
     private double total;
 
+    // Se agrega 'final' porque la lista se inicializa aquí y no tiene un Setter.
+    // Esto es seguro para JPA y sigue las recomendaciones de diseño.
     @OneToMany(mappedBy = "pedido", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<DetallePedido> detalles = new ArrayList<>();
+    private final List<DetallePedido> detalles = new ArrayList<>();
 
-    public int getId()                       { return id; }
-    public Cliente getCliente()              { return cliente; }
-    public EstadoPedido getEstado()          { return estado; }
-    public double getTotal()                 { return total; }
-    public List<DetallePedido> getDetalles() { return detalles; }
+    // Getters
+    public int getId() { 
+        return id; 
+    }
+    
+    public Cliente getCliente() { 
+        return cliente; 
+    }
+    
+    public EstadoPedido getEstado() { 
+        return estado; 
+    }
+    
+    public double getTotal() { 
+        return total; 
+    }
+    
+    public List<DetallePedido> getDetalles() { 
+        return detalles; 
+    }
 
-    public void setCliente(Cliente c)               { this.cliente = c; }
-    public void setEstado(EstadoPedido e)            { this.estado = e; }
-    public void setTotal(double t)                  { this.total = t; }
+    // Setters
+    public void setCliente(Cliente c) { 
+        this.cliente = c; 
+    }
+    
+    public void setEstado(EstadoPedido e) { 
+        this.estado = e; 
+    }
+    
+    public void setTotal(double t) { 
+        this.total = t; 
+    }
+
 }

@@ -9,13 +9,37 @@
 Content-Type: application/json
 ```
 
-Puedes crear una variable en Postman:
+Puedes crear esta variable en Postman:
 
 ```text
 {{baseUrl}} = http://localhost:8081
 ```
 
-## Valores permitidos en enums
+## Campos libres del cliente
+
+### Genero
+
+Ahora `genero` es texto libre. Ejemplos:
+
+```text
+Masculino
+Femenino
+No binario
+Prefiero no decirlo
+Otro
+```
+
+### Tipo de identificacion
+
+Ahora `tipoIdentificacion` tambien es texto libre. Ejemplos:
+
+```text
+Cedula
+Pasaporte
+Tarjeta de identidad
+NIT
+Cedula de extranjeria
+```
 
 ### Tipo de envio
 
@@ -34,15 +58,23 @@ PSE
 EFECTIVO
 ```
 
-## Orden recomendado para probar toda la API
+## Orden recomendado de pruebas
 
-### 1. Listar productos
+### 1. Crear cliente
 
 ```http
-GET {{baseUrl}}/productos
+POST {{baseUrl}}/clientes
 ```
 
-Uso: revisar los `id` de productos antes de agregarlos a un pedido.
+```json
+{
+  "nombre": "Juan Perez",
+  "correo": "juan@mail.com",
+  "genero": "Masculino",
+  "numeroIdentificacion": "1234567890",
+  "tipoIdentificacion": "Pasaporte"
+}
+```
 
 ### 2. Listar clientes
 
@@ -50,64 +82,29 @@ Uso: revisar los `id` de productos antes de agregarlos a un pedido.
 GET {{baseUrl}}/clientes
 ```
 
-### 3. Crear cliente
+### 3. Listar productos
 
 ```http
-POST {{baseUrl}}/clientes
+GET {{baseUrl}}/productos
 ```
 
-Body:
-
-```json
-{
-  "nombre": "Juan Perez",
-  "correo": "juan@mail.com"
-}
-```
-
-Esperado: `201 Created`
-
-### 4. Crear pedido
-
-```http
-POST {{baseUrl}}/pedidos
-```
-
-Body:
-
-```json
-{
-  "idCliente": 1
-}
-```
-
-Esperado: `201 Created`
-
-### 5. Listar pedidos
-
-```http
-GET {{baseUrl}}/pedidos
-```
-
-### 6. Consultar stock de un producto
+### 4. Consultar stock
 
 ```http
 GET {{baseUrl}}/inventario/1/stock
 ```
 
-### 7. Verificar si hay stock
+### 5. Verificar stock
 
 ```http
 GET {{baseUrl}}/inventario/1/haystock?cantidad=2
 ```
 
-### 8. Agregar stock
+### 6. Agregar stock
 
 ```http
 PUT {{baseUrl}}/inventario/1/agregar
 ```
-
-Body:
 
 ```json
 {
@@ -115,31 +112,23 @@ Body:
 }
 ```
 
-Esperado: `200 OK`
-
-### 9. Descontar stock
+### 7. Crear pedido
 
 ```http
-PUT {{baseUrl}}/inventario/1/descontar
+POST {{baseUrl}}/pedidos
 ```
-
-Body:
 
 ```json
 {
-  "cantidad": 2
+  "idCliente": 1
 }
 ```
 
-Esperado: `200 OK`
-
-### 10. Agregar producto a un pedido
+### 8. Agregar producto al pedido
 
 ```http
 POST {{baseUrl}}/pedidos/1/productos
 ```
-
-Body:
 
 ```json
 {
@@ -148,27 +137,23 @@ Body:
 }
 ```
 
-Esperado: `200 OK`
-
-### 11. Ver resumen del pedido
+### 9. Ver resumen del pedido
 
 ```http
 GET {{baseUrl}}/pedidos/1/resumen
 ```
 
-### 12. Ver total del pedido
+### 10. Ver total del pedido
 
 ```http
 GET {{baseUrl}}/pedidos/1/total
 ```
 
-### 13. Crear envio
+### 11. Crear envio
 
 ```http
 POST {{baseUrl}}/envios
 ```
-
-Body:
 
 ```json
 {
@@ -179,27 +164,23 @@ Body:
 }
 ```
 
-Esperado: `201 Created`
-
-### 14. Listar envios
+### 12. Listar envios
 
 ```http
 GET {{baseUrl}}/envios
 ```
 
-### 15. Calcular costo de envio
+### 13. Calcular costo del envio
 
 ```http
 GET {{baseUrl}}/envios/1/costo
 ```
 
-### 16. Registrar pago
+### 14. Registrar pago
 
 ```http
 POST {{baseUrl}}/transacciones/pagos
 ```
-
-Body:
 
 ```json
 {
@@ -209,15 +190,11 @@ Body:
 }
 ```
 
-Esperado: `201 Created`
-
-### 17. Registrar devolucion
+### 15. Registrar devolucion
 
 ```http
 POST {{baseUrl}}/transacciones/devoluciones
 ```
-
-Body:
 
 ```json
 {
@@ -227,212 +204,104 @@ Body:
 }
 ```
 
-Esperado: `201 Created`
-
-### 18. Listar transacciones
+### 16. Listar transacciones
 
 ```http
 GET {{baseUrl}}/transacciones
 ```
 
-### 19. Procesar transaccion
+### 17. Procesar transaccion
 
 ```http
 PUT {{baseUrl}}/transacciones/1/procesar
 ```
 
-Esperado: `200 OK`
+## Pruebas de validacion
 
-## Pruebas de error recomendadas
-
-### 1. Cliente con correo invalido
+### Correo invalido
 
 ```http
 POST {{baseUrl}}/clientes
 ```
-
-Body:
 
 ```json
 {
   "nombre": "Pedro",
-  "correo": "pedrocorreo.com"
+  "correo": "pedromail.com",
+  "genero": "No binario",
+  "numeroIdentificacion": "99887766",
+  "tipoIdentificacion": "Cedula"
 }
 ```
 
 Esperado: `400 Bad Request`
 
-### 2. Cliente repetido con el mismo correo
+### Correo repetido
 
 ```http
 POST {{baseUrl}}/clientes
 ```
 
-Body:
-
 ```json
 {
-  "nombre": "Juan Perez",
-  "correo": "juan@mail.com"
+  "nombre": "Juan Repetido",
+  "correo": "juan@mail.com",
+  "genero": "Masculino",
+  "numeroIdentificacion": "11111111",
+  "tipoIdentificacion": "Cedula"
 }
 ```
 
 Esperado: `409 Conflict`
 
-### 3. Crear pedido con cliente inexistente
+### Numero de identificacion repetido
 
 ```http
-POST {{baseUrl}}/pedidos
+POST {{baseUrl}}/clientes
 ```
-
-Body:
 
 ```json
 {
-  "idCliente": 999
-}
-```
-
-Esperado: `404 Not Found`
-
-### 4. Agregar producto con stock insuficiente
-
-```http
-POST {{baseUrl}}/pedidos/1/productos
-```
-
-Body:
-
-```json
-{
-  "idProducto": 1,
-  "cantidad": 9999
+  "nombre": "Maria Lopez",
+  "correo": "maria@mail.com",
+  "genero": "Femenino",
+  "numeroIdentificacion": "1234567890",
+  "tipoIdentificacion": "Cedula"
 }
 ```
 
 Esperado: `409 Conflict`
 
-### 5. Agregar stock con cantidad invalida
+### Genero faltante
 
 ```http
-PUT {{baseUrl}}/inventario/1/agregar
+POST {{baseUrl}}/clientes
 ```
-
-Body:
 
 ```json
 {
-  "cantidad": 0
+  "nombre": "Ana",
+  "correo": "ana@mail.com",
+  "numeroIdentificacion": "77777777",
+  "tipoIdentificacion": "CEDULA"
 }
 ```
 
 Esperado: `400 Bad Request`
 
-### 6. Descontar stock con cantidad invalida
+### Tipo de identificacion faltante
 
 ```http
-PUT {{baseUrl}}/inventario/1/descontar
+POST {{baseUrl}}/clientes
 ```
-
-Body:
 
 ```json
 {
-  "cantidad": -1
+  "nombre": "Luis",
+  "correo": "luis@mail.com",
+  "genero": "MASCULINO",
+  "numeroIdentificacion": "33333333"
 }
 ```
 
 Esperado: `400 Bad Request`
-
-### 7. Crear envio con peso invalido
-
-```http
-POST {{baseUrl}}/envios
-```
-
-Body:
-
-```json
-{
-  "idPedido": 1,
-  "peso": 0,
-  "volumen": 1.2,
-  "tipoEnvio": "ESTANDAR"
-}
-```
-
-Esperado: `400 Bad Request`
-
-### 8. Crear segundo envio para el mismo pedido
-
-```http
-POST {{baseUrl}}/envios
-```
-
-Body:
-
-```json
-{
-  "idPedido": 1,
-  "peso": 1.5,
-  "volumen": 1.0,
-  "tipoEnvio": "DRON"
-}
-```
-
-Esperado: `409 Conflict`
-
-### 9. Registrar pago con monto negativo
-
-```http
-POST {{baseUrl}}/transacciones/pagos
-```
-
-Body:
-
-```json
-{
-  "idPedido": 1,
-  "monto": -5000,
-  "metodo": "PSE"
-}
-```
-
-Esperado: `400 Bad Request`
-
-### 10. Registrar devolucion sin motivo
-
-```http
-POST {{baseUrl}}/transacciones/devoluciones
-```
-
-Body:
-
-```json
-{
-  "idPedido": 1,
-  "monto": 10000,
-  "motivo": ""
-}
-```
-
-Esperado: `400 Bad Request`
-
-### 11. Consultar recurso inexistente
-
-```http
-GET {{baseUrl}}/envios/999/costo
-```
-
-Esperado: `404 Not Found`
-
-## Ejemplo de respuesta de error
-
-```json
-{
-  "status": 400,
-  "error": "Solicitud invalida",
-  "mensaje": "El monto debe ser positivo",
-  "timestamp": "2026-03-26T10:00:00"
-}
-```

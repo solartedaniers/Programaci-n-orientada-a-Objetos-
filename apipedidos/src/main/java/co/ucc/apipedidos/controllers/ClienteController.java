@@ -25,7 +25,12 @@ public class ClienteController {
 
     @PostMapping
     public ResponseEntity<Cliente> crear(@RequestBody ClienteDTO dto) {
-        Cliente cliente = clienteService.crearCliente(dto.getNombre(), dto.getCorreo());
+        Cliente cliente = clienteService.crearCliente(
+            dto.getNombre(),
+            dto.getCorreo(),
+            dto.getGenero(),
+            dto.getNumeroIdentificacion(),
+            dto.getTipoIdentificacion());
         return ResponseEntity.status(HttpStatus.CREATED).body(cliente);
     }
 
